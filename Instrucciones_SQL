@@ -1,0 +1,88 @@
+
+/*Información de la tabla browse para los 10 primeros registros*/
+SELECT * FROM browse LIMIT 10;
+
+/*Consultar todos los registros de la tabla celebs*/
+SELECT*FROM celebs;
+
+/* Clausula CREATE para crear la tabla celebs con sus columnas y tipos de datos*/
+CREATE TABLE celebs (
+   id INTEGER, 
+   name TEXT, 
+   age INTEGER
+);
+
+/* Clausula INSERT INTO para ingresar registros en la tabla que se creó previamente*/
+INSERT INTO celebs (id, name, age) VALUES (1, 'Justin Bieber', 22); 
+
+INSERT INTO celebs (id, name, age) 
+VALUES (2, 'Beyonce Knowles', 33); 
+
+INSERT INTO celebs (id, name, age) 
+VALUES (3, 'Jeremy Lin', 26); 
+
+INSERT INTO celebs (id, name, age) 
+VALUES (4, 'Taylor Swift', 26); 
+
+/* Clausula SELECT para consultar los nombres de la tabla*/ 
+SELECT name FROM celebs;
+
+/* Clausula ALTER para modificar la tabla y adicionar una nueva columna de tipo TEXT*/
+ALTER TABLE celebs 
+ADD COLUMN twitter_handle TEXT; 
+
+/* Clausula WHERE permite actualizar en la tabla un campo utilizando SET y WHERE para indicar el id del registro que debe actualizar*/
+UPDATE celebs 
+SET twitter_handle = '@taylorswift13' 
+WHERE id = 4; 
+
+/* Clausula DELETE para eliminar de la tabla aquellos registros que cumplen con la condición definida por WHERE. En este caso que el campo sea nulo.*/
+DELETE FROM celebs 
+WHERE twitter_handle IS NULL;
+
+
+/* Constraints o restricciones: clave primaria, texto no nulo, texto por default si no se ingresa nada*/
+CREATE TABLE awards (
+   id INTEGER PRIMARY KEY,
+   recipient TEXT NOT NULL,
+   award_name TEXT DEFAULT 'Grammy'
+);
+
+
+
+/**********************************************************************************************************************************/
+
+/* Clausula SELECT para seleccionar solo dos columnas de la tabla*/
+SELECT name, genre FROM movies;
+
+/* AS permite crear un alias cuando se realiza la consulta*/
+SELECT name AS 'Nombre' FROM movies;
+
+/*DISTINCT es para filtrar valores único al realizar la consulta. Evita traer valores repetidos*/
+SELECT DISTINCT genre FROM movies;
+
+/*WHERE para definir el criterio que queremos consultar. En esta caso son los registros que tienen un rating inferior a 5 */
+SELECT * FROM movies WHERE imdb_rating < 5;
+
+SELECT * FROM movies WHERE year > 2014;
+
+/*LIKE permite establecer patrones para realizar búsquedas más especificas. El caracter _ significa que se busca 'Se cualquier caracter en'.*/
+SELECT * FROM movies WHERE name LIKE 'Se_en';
+
+
+/* El caracter % significa todos los caracteres. Permite buscar registros que comienzar por..., finalizan con..., tienen en la mitad..., */
+SELECT * FROM movies WHERE name LIKE 'A%';
+SELECT * FROM movies WHERE name LIKE '%man%';
+SELECT * FROM movies WHERE name LIKE 'The %';
+
+/*Selecciona los registro donde el imdb_rating no es nulo */
+SELECT name FROM movies WHERE imdb_rating IS NOT NULL;
+
+/*Selecciona los registro donde el imdb_rating es nulo */
+SELECT name FROM movies WHERE imdb_rating IS NULL;
+
+
+
+
+
+
