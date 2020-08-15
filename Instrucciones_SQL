@@ -81,6 +81,85 @@ SELECT name FROM movies WHERE imdb_rating IS NOT NULL;
 /*Selecciona los registro donde el imdb_rating es nulo */
 SELECT name FROM movies WHERE imdb_rating IS NULL;
 
+/* BETWEEN se utiliza para definir rangos en el filtro*/
+SELECT * FROM movies WHERE year BETWEEN 1990 AND 1999;
+SELECT * FROM movies WHERE name BETWEEN 'A' AND 'J';
+
+/* Ojo, en este caso no incluye G*/
+SELECT * FROM movies WHERE name BETWEEN 'D' AND 'G';
+
+/* Varias condiciones en el filtro utilizando el operador AND */
+
+SELECT * FROM movies WHERE year BETWEEN 1970 AND 1979 AND imdb_rating > 8;
+
+/* Varias condiciones en el filtro utilizando el operador OR (una condición, la otra o ambas) */
+SELECT * FROM movies WHERE year > 2014 OR genre = 'action';
+
+/* ORDER BY permite ordenar por el año en este caso descendente. Si se requiere ascendente se utiliza ASC*/
+SELECT * FROM movies WHERE imdb_rating > 8 ORDER BY year DESC;
+
+/* Se selecciona nombre y año de la table, ordenado por nombre*/
+SELECT name, year FROM movies ORDER BY name;
+
+SELECT name, year, imdb_rating FROM movies ORDER BY imdb_rating DESC;
+
+/* Con LIMIT se establece la cantidad de registros */
+SELECT * FROM movies ORDER BY imdb_rating DESC LIMIT 3;
+
+/* Se utiliza CASE para definir tres escenarios diferentes */
+
+SELECT name,
+ CASE
+  WHEN imdb_rating > 8 THEN 'Fantastic'
+  WHEN imdb_rating > 6 THEN 'Poorly Received'
+  ELSE 'Avoid at All Costs'
+ END
+FROM movies;
+
+/* Se agrega un AS para nombrar la columna nueva que se crea con el comentario según el caso que se cumple*/
+
+SELECT name,
+ CASE
+  WHEN genre="romance" THEN 'Chill'
+  WHEN genre="comedy" THEN 'Chill'
+  ELSE 'Intense'
+ END AS "Mood"
+FROM movies;
+
+/*******************************************************************************************************************************/
+
+SELECT year,number FROM babies WHERE gender="F" AND name="Lillian";
+
+/* Find 20 distinct names that start with ‘S’.*/
+SELECT DISTINCT name FROM babies WHERE name LIKE "S%" LIMIT 20;
+
+/*What are the top 10 names in 1880?*/
+SELECT name,gender,number FROM babies WHERE year=1880 ORDER BY number DESC LIMIT 10;
+
+/* Return all the restaurants that are Japanese and $$.*/
+SELECT * FROM nomnom WHERE cuisine="Japanese" AND price="$$";
+
+/* Your roommate Bevers can’t remember the exact name of a restaurant he went to but he knows it contains the word ‘noodle’ in it.
+Can you find it for him using a query?*/
+ SELECT * FROM nomnom WHERE name LIKE "%noodle%";
+ 
+ /*Find the restaurants that have empty health values.*/
+ SELECT * FROM nomnom WHERE health IS NULL;
+  
+ /*Order the table by title (from A-Z).*/
+  SELECT title,publisher FROM news ORDER BY title ASC;
+  
+ /*Which article names have the word 'bitcoin' in it?*/
+ SELECT * FROM news WHERE title LIKE "%bitcoin%";
+ 
+ /* What are the 20 business articles published most recently?*/
+ SELECT * FROM news WHERE category='b' ORDER BY timestamp DESC LIMIT 20;
+ 
+ 
+ /******************************************************************************************************************/
+ 
+  
+ 
 
 
 
