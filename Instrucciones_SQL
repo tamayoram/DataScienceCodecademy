@@ -158,7 +158,82 @@ Can you find it for him using a query?*/
  
  /******************************************************************************************************************/
  
-  
+ /*Calculation -----> Aggregates*/
+ 
+ /* Contar el número de filas en la base de datos*/
+ SELECT COUNT (*) FROM fake_apps;
+ 
+ /* Contar la cantidad de filas condicionado a que el precio sea cero*/
+SELECT COUNT (*) FROM fake_apps WHERE price=0;
+
+/* Suma los valores del campo que se encuentra entre parentesis*/
+SELECT SUM(downloads) FROM fake_apps;
+
+/* Cantidad mínima de descargas*/
+SELECT MIN(downloads) FROM fake_apps;
+
+/* El precio más alto de las apps que se encuentran en la tabla*/
+SELECT MAX(price) FROM fake_apps;
+
+/* Número promedio de descargas*/
+SELECT AVG(downloads) FROM fake_apps;
+
+/*Precio promedio*/
+SELECT AVG(price) FROM fake_apps;
+
+/*Returna la columna nombre y una columna con el precio redondeado con cero decimales*/
+SELECT name, ROUND(price, 0) FROM fake_apps;
+
+/*Redondear el precio promedio a dos decimales*/
+SELECT ROUND(AVG(price),2) FROM fake_apps;
+
+/*Permite agrupar utilizando la clausula GROUP BY. En este caso se realiza el conteo por cada tipo de precio*/
+SELECT price, COUNT(*) FROM fake_apps GROUP BY price;
+
+/* Parecido al anterior pero con un filtro establecido por la clausula WHERE*/
+SELECT price, COUNT(*) FROM fake_apps WHERE downloads>20000 GROUP BY price;
+
+/* Presenta para el campo categoría la suma de descargas agrupadas por categoría*/
+SELECT category, SUM(downloads) FROM fake_apps GROUP BY category;
+
+/* Se pueden realizar agrupaciones de subconjuntos dentro de conjuntos de variables. En este caso se saca el promedio de descargas de la categoría y luego el precio dentro de cada categoría*/
+SELECT category, price, AVG(downloads) FROM fake_apps GROUP BY category, price;
+
+/*Igual al anterior pero de acuerdo al número de la columna en el query*/
+SELECT category, price, AVG(downloads) FROM fake_apps GROUP BY 1,2;
+
+/*HAVING cumple una función similar a WHERE pero cuando el query tiene agrupaciones. En este caso el query muestra por tipo de precio, el promedio de descargas, el conteo de apps por cada tipo, pero filtrado para que el conteo sea mayor a 10*/
+SELECT price, ROUND(AVG(downloads)), COUNT(*) FROM fake_apps GROUP BY price HAVING COUNT(price)>10;
+
+/**************************************************************************************************************************/
+
+/* Use COUNT() and a LIKE operator to determine the number of users that have an email ending in ‘.com’.*/
+
+SELECT COUNT(email) FROM users WHERE email LIKE "%.COM";
+
+/*What are the most popular first names on Codeflix?*/
+
+SELECT first_name, COUNT(*) FROM users GROUP BY first_name ORDER BY 2 DESC;
+
+/*The UX Research team wants to see a distribution of watch durations*/
+SELECT ROUND(watch_duration_in_minutes,0) AS 'duration', COUNT(watch_duration_in_minutes) FROM watch_history GROUP BY 1 ORDER BY 1 ASC;
+
+/*Find all the users that have successfully made a payment to Codeflix and find their total amount paid.*/
+SELECT (user_id), SUM (amount) FROM payments WHERE status="paid" GROUP BY 1 ORDER BY 2 DESC;
+
+/*Generate a table of user ids and total watch duration for users who watched more than 400 minutes of content.*/
+SELECT (user_id),SUM(watch_duration_in_minutes) FROM watch_history GROUP BY 1 HAVING SUM(watch_duration_in_minutes)>400;
+
+/*To the nearest minute, how many minutes of content were streamed on Codeflix?*/
+SELECT ROUND(SUM(watch_duration_in_minutes),0) FROM watch_history;
+
+/*Which days in this period did Codeflix collect the most money?*/
+SELECT pay_date,SUM(amount) FROM payments WHERE status='paid' GROUP BY pay_date ORDER BY 2 DESC;
+
+/*Of all the events in the watch_history table, what is the duration of the longest individual watch event? What is the duration of the shortest?*/
+SELECT MAX (watch_duration_in_minutes),MIN(watch_duration_in_minutes) FROM watch_history;
+
+
  
 
 
