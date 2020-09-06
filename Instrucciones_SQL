@@ -233,8 +233,248 @@ SELECT pay_date,SUM(amount) FROM payments WHERE status='paid' GROUP BY pay_date 
 /*Of all the events in the watch_history table, what is the duration of the longest individual watch event? What is the duration of the shortest?*/
 SELECT MAX (watch_duration_in_minutes),MIN(watch_duration_in_minutes) FROM watch_history;
 
+/***************************************************************************************************/
+
+SELECT * FROM startups;
+SELECT COUNT (*) FROM startups;
+SELECT SUM(valuation) FROM startups;
+SELECT MAX(raised) FROM startups;
+SELECT MAX(raised) FROM startups WHERE stage="Seed";
+
+SELECT MIN(founded) FROM startups;
+
+SELECT AVG(valuation) FROM startups;
+
+SELECT category, AVG(valuation) FROM startups GROUP BY category;
+
+SELECT category, ROUND(AVG(valuation),2) FROM startups GROUP BY category;
+
+SELECT category, ROUND(AVG(valuation),2) as Average FROM startups GROUP BY category ORDER BY 2 DESC;
+
+SELECT category, COUNT(name) FROM startups GROUP BY category;
+
+SELECT category, COUNT(name) FROM startups GROUP BY category HAVING COUNT(name)>3;
+
+SELECT location, AVG(employees) FROM startups GROUP BY location HAVING AVG(employees)<500;
+
+/****************************************************************************************************/
+
+SELECT title, score
+FROM hacker_news
+ORDER BY score DESC
+LIMIT 5; 
+
+SELECT SUM(score)
+FROM hacker_news;
+
+SELECT user, SUM(score)
+FROM hacker_news
+GROUP BY user
+HAVING SUM(score) > 200
+ORDER BY 2 DESC;
+
+SELECT (517 + 309 + 304 + 282) / 6366.0;
+
+SELECT user,
+   COUNT(*)
+FROM hacker_news
+WHERE url LIKE '%watch?v=dQw4w9WgXcQ%'
+GROUP BY user
+ORDER BY COUNT(*) DESC;
+
+SELECT CASE
+   WHEN url LIKE '%github.com%' THEN 'GitHub'
+   WHEN url LIKE '%medium.com%' THEN 'Medium'
+   WHEN url LIKE '%nytimes.com%' THEN 'New York Times'
+   ELSE 'Other'
+  END AS 'Source'
+FROM hacker_news;
+
+SELECT CASE
+   WHEN url LIKE '%github.com%' THEN 'GitHub'
+   WHEN url LIKE '%medium.com%' THEN 'Medium'
+   WHEN url LIKE '%nytimes.com%' THEN 'New York Times'
+   ELSE 'Other'
+  END AS 'Source',
+  COUNT(*)
+FROM hacker_news
+GROUP BY 1;
+
+/*********************************************************************************************************************/
+
+ SELECT * FROM met LIMIT 10;
+ SELECT COUNT(*) FROM met;
+ SELECT COUNT(*) FROM met WHERE category LIKE '%celery%';
+ SELECT DISTINCT category FROM met WHERE category LIKE '%celery%';
+
+SELECT MIN(date) FROM met;
+SELECT DISTINCT title,medium FROM met WHERE date LIKE '%1600%';
+
+SELECT country, COUNT(*) AS 'Count' FROM met GROUP BY country ORDER BY 2 DESC LIMIT 10; 
+
+SELECT category, COUNT(*) FROM met GROUP BY 1 HAVING COUNT(*) > 100;
+
+SELECT medium, COUNT(*) FROM met WHERE medium LIKE '%gold%' OR  medium LIKE '%silver%';
+
+SELECT CASE
+   WHEN medium LIKE '%gold%'   THEN 'Gold'
+   WHEN medium LIKE '%silver%' THEN 'Silver'
+   ELSE NULL
+  END AS 'Bling',
+  COUNT(*)
+FROM met
+WHERE Bling IS NOT NULL
+GROUP BY 1
+ORDER BY 2 DESC;
+
+/**********************************************************************************************************************/
+
+ SELECT * FROM transactions;
+ SELECT SUM(money_in) FROM transactions;
+  SELECT SUM(money_out) FROM transactions;
+
+SELECT COUNT(money_in) FROM transactions;
+SELECT COUNT(money_in) FROM transactions WHERE currency="BIT";
+
+SELECT user_id, MAX(money_in) FROM transactions;
+SELECT user_id, MAX(money_out) FROM transactions;
+
+SELECT AVG(money_in) FROM transactions WHERE currency="ETH";
+
+SELECT date, ROUND(AVG(money_in),2) AS 'Inflow', ROUND(AVG(money_out),2) AS 'Outflow' FROM transactions GROUP BY date;
+
+/**************************Working with multiple tables**************************************************************/
+
+SELECT * FROM orders LIMIT 5;
+
+SELECT * FROM subscriptions LIMIT 5;
+
+SELECT * FROM customers LIMIT 5;
+
+/* Se seleccionan todos campos de la tabla orders unido con la tabla subscriptions a través del campo subscription_id que esta en ambas tablas*/
+
+SELECT * FROM orders JOIN subscriptions ON orders.subscription_id=subscriptions.subscription_id;
+
+/*La anterior con filtro*/
+SELECT * FROM orders JOIN subscriptions ON orders.subscription_id=subscriptions.subscription_id WHERE description="Fashion Magazine";
+
+/*	Query utilizando el id como unión para las dos tablas*/
+
+SELECT COUNT(*) FROM newspaper;
+SELECT COUNT(*) FROM online;
+
+SELECT COUNT(*) FROM newspaper JOIN online ON newspaper.id=online.id;
+
+/*LEFT JOIN: Cuando se utiliza left join se dejan todos los registros de la primera tabla (la tabla a la izquierda). Los registro de la otra tabla que cruzan se completan, los que no se cruzan se borran*/
+SELECT * FROM newspaper LEFT JOIN online ON newspaper.id = online.id;
+
+/* Se adiciona un filtro para los registros cuyo id en la tabla online es nulo*/
+SELECT * FROM newspaper LEFT JOIN online ON newspaper.id = online.id WHERE online.id IS NULL;
+
+/* Se cruzan las tabblas teniendo en cuenta que en la tabla clases la clave primaria es id, y esta misma variable esta en la tabla student como clave foranea denominada class_id.*/
+SELECT * FROM students JOIN classes ON students.class_id=classes.id;
+
+/**************************/
+/*Se cuenta la cantidad de suscriptores que iniciaron antes del mes 3 y continuan después de este mes*/
+SELECT COUNT(*) FROM newspaper WHERE start_month<=3 AND end_month>=3;
+
+/*Se cruzan dos bases de datos sin unión a través de una variable específica*/
+SELECT * FROM newspaper CROSS JOIN months;
+
+SELECT * FROM newspaper CROSS JOIN months WHERE start_month<=month AND end_month>=month;
+
+/***************************UNION: Permite unir registros de dos tablas cuando tienen los mismos campos. Es adicionar una sobre la otra*******************************/
+
+/*Para usar UNION las tablas deben tener la misma cantidad de columnas, las columnas deben tener el mismo tipo de datos y deben tener el mismo orden que la primera tabla*********/
+SELECT * FROM newspaper UNION SELECT * FROM online;
+
+/*****WITH:permite juntar dos tablas, pero una de las tablas es el resultado de cálculos previos***/
+WITH previous_query AS (
+SELECT customer_id,
+       COUNT(subscription_id) as subscriptions
+FROM orders
+GROUP BY customer_id)
+SELECT customers.customer_name,
+previous_query.subscriptions
+FROM previous_query
+JOIN customers
+	ON customers.customer_id = previous_query.customer_id;
+
+/*********************************************************************************************************************************************/
+
+
+/*Se selecciona la variable user_id de la tabla premium y la variable description de la tabla plan. 
+Lo anterior a partir de juntar las dos tablas premium y plans a partir de la variable id de plans y la variable membership_plan_id que 
+son la misma*/
+SELECT premium_users.user_id, plans.description FROM premium_users JOIN plans ON plans.id = premium_users.membership_plan_id;
+
+/*Se selecciona la variable user_id de plays, la variable play_date de plays, y la variable titlede songs. Las dos tablas se unen por el id.*/
+
+ SELECT plays.user_id,plays.play_date,songs.title FROM songs JOIN plays ON songs.id=plays.song_id;
+ 
+ /*Se fusionan la users y premium_users usando el id. Como se realiza la fusión con LEFT JOIN quedan tanto registro que cruzan
+ como los que no cruzan. Se utilizan un filtro WHERE para sacar los que no cruzan, porque se desea conocer que usuarios no son premium.*/
+ 
+ SELECT id FROM users LEFT JOIN premium_users ON users.id = premium_users.user_id WHERE premium_users.user_id IS NULL;
+ 
+ 
+ /* Con el WITH se generan unas tablas temporales llamadas january y february que seleccionan las canciones con filtro enero y febrero. 
+ Luego con el select se uenn las dos tablas temprarles y se saca solo lo de enero.*/
+ WITH january AS (
+  SELECT *
+  FROM plays
+  WHERE strftime("%m", play_date) = '01'
+),
+february AS (
+  SELECT *
+  FROM plays
+  WHERE strftime("%m", play_date) = '02'
+
+)
+
+ SELECT january.user_id FROM january LEFT JOIN february ON january.user_id = february.user_id WHERE february.user_id IS NULL;
+ 
+ 
+ /* Se unen sin variable en comun dos bases de datos. Para eso se utiliza CROSS JOIN. Para cada usuario en la tabla premium_users
+ se repiten los meses de la tabla month. Luego de tener unidas las tablas se seleccionan las variables correspondientes.*/
+ 
+ SELECT premium_users.user_id,premium_users.purchase_date,premium_users.cancel_date,months.months FROM premium_users CROSS JOIN months;
+ 
+ 
+
+/*Se unen las dos tablas, y se utiliza el CASE para escoger los usuarios activos y no activos*/
+SELECT premium_users.user_id,
+  months.months,
+  CASE
+    WHEN (
+      premium_users.purchase_date <=
+             months.months
+      )
+      AND
+      (
+        (premium_users.cancel_date >=
+                months.months)
+        OR
+        premium_users.cancel_date IS NULL
+      )
+    THEN 'active'
+    ELSE 'not_active'
+  END as status
+
+FROM premium_users
+CROSS JOIN months;
+
 
  
+ 
+ 
+ 
+ 
+
+
+
+
+
 
 
 
