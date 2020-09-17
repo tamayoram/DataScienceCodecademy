@@ -1,0 +1,5 @@
+ls-para listar
+mkdir test-crea una nueva carpeta que se llama test
+cd test-entrar a la carpeta test.
+echo "Hello Command Line" >> hello_cli.txt - Se crea un archivo que se llama hello_cli.txt y adentro tiene Hello Command Line.
+cat hello_cli.txt-Mostrar en pantalla lo que tiene el archivo hello_cli.txt.
