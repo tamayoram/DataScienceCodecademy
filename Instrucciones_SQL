@@ -509,13 +509,128 @@ WHERE total_trips < 500;
 
 /******************************************************************************************************************/
 
+ /* Selecciona las preguntas, cuenta la cantidad de id en cada pregunta y presenta una tabla ordenada con el conteo*/
+ SELECT question_text, COUNT(DISTINCT user_id) FROM survey_responses GROUP BY 1;
  
+ SELECT modal_text, COUNT (DISTINCT user_id) FROM onboarding_modals GROUP BY modal_text ORDER BY modal_text;
 	
+/* Selecciona los casos único de modal text cuando ab_group=control agrupado y ordenado por modal_text*/
+
+SELECT modal_text, COUNT(DISTINCT CASE WHEN ab_group = 'control' THEN user_id END) AS 'control_clicks' FROM onboarding_modals GROUP BY 1 ORDER BY 1;
+
+
+/* Se selecciona modal text, se realiza el conteo de los user id cuando ab group es control, y otra columna cuando ab_group es variant, agrupado y ordenado*/
+SELECT modal_text,
+  COUNT(DISTINCT CASE
+    WHEN ab_group = 'control' THEN user_id
+    END) AS 'control_clicks',
+  COUNT(DISTINCT CASE
+    WHEN ab_group = 'variant' THEN user_id
+    END) AS 'variant_clicks'
+FROM onboarding_modals
+GROUP BY 1
+ORDER BY 1;
+
+/*Visualización de 5 registros en tres tablas*/
+
+SELECT * FROM browse LIMIT 5;
+
+SELECT * FROM checkout LIMIT 5;
+
+SELECT * FROM purchase LIMIT 5;
+
+/* Selección de los campos de tres tablas usando el user_id como clave para unirlas. Cómo es LEFT JOIN quedan todos los registros de la primera tabla*/
+
+SELECT * FROM browse AS 'b' LEFT JOIN checkout AS 'c' ON c.user_id=b.user_id LEFT JOIN purchase AS 'p' ON p.user_id=c.user_id LIMIT 50;
+
+/* Se seleccionan casos únicos con el DISTINCT de las variables browse date, user id, user id de c si no es nulo, user id de p si es no nulo
+de la tabla browse que tiene un alias, y que realiza un left join a través del user id */
+
+ SELECT DISTINCT b.browse_date,
+   b.user_id,
+   c.user_id IS NOT NULL AS 'is_checkout',
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM browse AS 'b'
+LEFT JOIN checkout 'c'
+  ON c.user_id = b.user_id
+LEFT JOIN purchase 'p'
+  ON p.user_id = c.user_id
+LIMIT 50;
+
+/* Se incluye todo el query anterior en un WITH para que se entienda como una tabla. Con el select count de afuera se calcula la cantidad de registros
+que tiene esta consulta*/
+
+WITH funnels AS (
+  SELECT DISTINCT b.browse_date,
+     b.user_id,
+     c.user_id IS NOT NULL AS 'is_checkout',
+     p.user_id IS NOT NULL AS 'is_purchase'
+  FROM browse AS 'b'
+  LEFT JOIN checkout AS 'c'
+    ON c.user_id = b.user_id
+  LEFT JOIN purchase AS 'p'
+    ON p.user_id = c.user_id)
+SELECT COUNT(*) AS 'num_browse'
+FROM funnels;
+
+/* El cambio respecto al anterior es que se adiciona un SUM para verificar la cantidad de registros 1 en el checkout y purchase. Adicionalmente,
+se realiza dos divisiones para calcular proporciones*/
+
+/* Tener en cuenta el 1.0 que se requiere para que la fracción se calcule correctamente*/
+
+WITH funnels AS (
+  SELECT DISTINCT b.browse_date,
+     b.user_id,
+     c.user_id IS NOT NULL AS 'is_checkout',
+     p.user_id IS NOT NULL AS 'is_purchase'
+  FROM browse AS 'b'
+  LEFT JOIN checkout AS 'c'
+    ON c.user_id = b.user_id
+  LEFT JOIN purchase AS 'p'
+    ON p.user_id = c.user_id)
+SELECT COUNT(*) AS 'num_browse',
+SUM(is_checkout) AS 'num_checkout',
+SUM(is_purchase) AS 'num_purchase',
+1.0 * SUM(is_checkout) / COUNT(user_id) AS 'browse_to_checkout',
+1.0 * SUM(is_purchase) / SUM(is_checkout) AS 'checkout_to_purchase'
+FROM funnels;
 
 
 
+/* With esta una consulta que se asume como una tabla. La consulta cruza tres tablas con leftjoin y usando el user_id. Luego
+de esa consulta with se saca las fechas browse date y para cada una se calculan unos indicadores que se agrupan y orden con el group by el order by*/
+
+WITH funnels AS (
+  SELECT DISTINCT b.browse_date,
+     b.user_id,
+     c.user_id IS NOT NULL AS 'is_checkout',
+     p.user_id IS NOT NULL AS 'is_purchase'
+  FROM browse AS 'b'
+  LEFT JOIN checkout AS 'c'
+    ON c.user_id = b.user_id
+  LEFT JOIN purchase AS 'p'
+    ON p.user_id = c.user_id)
+SELECT browse_date,
+   COUNT(*) AS 'num_browse',
+   SUM(is_checkout) AS 'num_checkout',
+   SUM(is_purchase) AS 'num_purchase',
+   1.0 * SUM(is_checkout) / COUNT(user_id) AS 'browse_to_checkout',
+   1.0 * SUM(is_purchase) / SUM(is_checkout) AS 'checkout_to_purchase'
+FROM funnels
+GROUP BY browse_date
+ORDER BY browse_date;
+
+/* Realizar un calculo sencillo en SQL. Énfasis en el punto después del 100 para permitir reflejar el punto flotante*/
+
+SELECT 100./2000;
 
 
+/*1.0 se utiliza para generar los números decimales del calculo. Se utilizan las clausulas WHERE AND BETWEEN para definir las fechas que se quieren
+tener dentro del cálculo*/.
+
+SELECT 1.0 * (SELECT COUNT(*) FROM subscriptions WHERE subscription_start < '2017-01-01' AND ( subscription_end BETWEEN '2017-01-01' AND '2017-01-31')
+) / (SELECT COUNT(*) FROM subscriptions WHERE subscription_start < '2017-01-01' AND ((subscription_end >= '2017-01-01') OR (subscription_end IS NULL))) 
+AS result;
  
  
  
